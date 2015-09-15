@@ -1,43 +1,40 @@
-import sqlite3
-from flask import Flask, request, session, g, redirect, url_for, \
-    abort, render_template, flash
-from contextlib import closing
+#coding=utf-8
 
-# configuration
-DATABASE = '/tmp/flaskr.db'
-DEBUG = True
-SECRET_KEY = 'development key'
-USERNAME = 'admin'
-PASSWORD = 'default'
-
-# create our little application:)
+from flask import Flask, url_for
 app = Flask(__name__)
-app.config.from_envvar('FLASKR_SETTINGS', silent=True)
-# app.config.from_object(DATABASE)
 
 
-def init_db():
-    with closing(connect_db()) as db:
-        with app.open_resource('schema.sql', mode='r') as f:
-            db.cursor().executescript(f.read())
-        db.commit()
-
-@app.before_request
-def before_request():
-    g.db = connect_db()
-
-@app.teardown_request
-def teardown_request():
-    db = getattr(g, 'db', None)
-    if db is not None:
-        db.close()
-    g.db.close()
+@app.route('/')
+def index():
+    return '欢迎光临！'
 
 
-def connect_db():
-    # print '%s' % app.config
-    return sqlite3.connect(app.config.from_object(DATABASE))  #sqlite3.connect(app.config['DATABASE'])
+@app.route('/login')
+def login():
+    return 'login page'
+
+
+@app.route('/hello')
+def hello_world():
+    return 'Hello World!'
+
+
+@app.route('/user/<username>')
+def profile(username):
+    return 'User %s' % username
+
+
+@app.route('/about')
+def about():
+    return 'About page'
+
+with app.test_request_context():
+    print url_for('index')
+    print url_for('login')
+    print url_for('login', next='/')
+    print url_for('profile', username='John Doe')
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.debug = True
+    app.run()
